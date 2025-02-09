@@ -16,13 +16,8 @@ st.set_page_config(page_title="AI Image & Speech App", layout="wide")
 st.markdown(
     """
     <style>
-        [data-testid="stSidebarNav"] {display: none;}
-    </style>
-        
-    
-    <style>
     .stApp {
-        background-color: #212f3c  !important;
+        background-color: #6495ED !important;
         padding: 20px;
     }
 
@@ -37,7 +32,7 @@ st.markdown(
     }
 
     .stButton>button {
-        background-color: #1A2A50 !important;
+        background-color: #1c6891  !important;
         color: white !important;
         border-radius: 10px !important;
         padding: 12px 24px !important;
@@ -68,14 +63,8 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-# Navigation Button
 if st.button("💬 Just Chat"):
     st.switch_page("pages/chat.py")  # Navigates to chat.py in the same tab
-# # Add "Just Chat" button in the top-right corner
-# st.markdown("<div class='chat-button'>", unsafe_allow_html=True)
-# if st.button("💬 Just Chat", key="chat_button"):
-#     os.system("streamlit run chat.py")  # Runs chat.py script
-# st.markdown("</div>", unsafe_allow_html=True)
 
 # Title
 st.markdown("<h1 class='title-container'>🎙️ AI IMAGE RECOGNITION & IMAGE APP</h1>", unsafe_allow_html=True)
