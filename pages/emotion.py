@@ -6,7 +6,7 @@ import numpy as np
 from deepface import DeepFace
 
 # Set up Google Gemini API
-GOOGLE_API_KEY = 'AIzaSyBO9AZPb3-POgPsp_QcbkK6y6aABjWVmqY'
+GOOGLE_API_KEY = 'YOUR_API_KEY'
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
