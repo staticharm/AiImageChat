@@ -86,3 +86,13 @@ if uploaded_file is not None:
         image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), 1)
         image_emotion = detect_image_emotion(image)
         st.write(f"🖼️ {image_emotion}")
+
+st.markdown(
+    """
+    <div class='footer'>
+        <p><strong>Sudheendra HR</strong> </p>
+        <p>&copy; 2024 AI Image & Speech App. All rights reserved.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)

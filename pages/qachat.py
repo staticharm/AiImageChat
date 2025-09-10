@@ -45,26 +45,28 @@ if 'chat_history' not in st.session_state:
 input = st.text_input("Input: ", key="input")
 submit = st.button("Ask the question")
 
+
 if submit and input:
     response = get_gemini_response(input)
-    # Add user query and response to session state chat history
     st.session_state['chat_history'].append(("You", input))
     st.subheader("The Response is")
-    for chunk in response:
-        st.write(chunk.text)
-        st.session_state['chat_history'].append(("Bot", chunk.text))
-st.subheader("The Chat History is")
 
+    full_response = "".join([chunk.text for chunk in response])
+
+
+    st.write(full_response)
+
+    st.session_state['chat_history'].append(("Bot", full_response))
+
+st.subheader("The Chat History is")
 for role, text in st.session_state['chat_history']:
     st.write(f"{role}: {text}")
+
 
 st.markdown(
     """
     <div class='footer'>
-        <p><strong>College</strong> D.B.I.T</p>
-        <p><strong>Department:</strong> AI & Data Science Department</p>
-        <p><strong>Guide:</strong> Dr Gowramma G S</p>
-        <p><strong>Team Members:</strong> Vaishnavi, Rishab,Navneeth , Sudheendra</p>
+        <p><strong>Sudheendra HR</strong> </p>
         <p>&copy; 2024 AI Image & Speech App. All rights reserved.</p>
     </div>
     """,
