@@ -1,3 +1,8 @@
+"""
+This script produces a .csv file for sample queries which results in ~90% accuracy for the model used .
+"""
+
+
 import time
 import psutil
 import csv
