@@ -8,3 +8,6 @@ venv/
 
 # Ignore Streamlit cache files
 .streamlit/
+.env
+.idea/
+.devcontainer

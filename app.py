@@ -1,3 +1,13 @@
+"""
+There is a commented out function for measuring the performance metrics and also commented out for displaying it.
+Performance metrics include Latency , CPU usage and memory usage .
+
+"""
+
+
+
+
+
 import streamlit as st
 import os
 from PIL import Image
@@ -7,6 +17,39 @@ from gtts import gTTS
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+import psutil
+import time
+
+# Create a small function to measure performance
+def measure_performance(func, *args, **kwargs):
+    process = psutil.Process()  # Current process (the Streamlit app)
+    mem_before = process.memory_info().rss / (1024 * 1024)  # MB
+    cpu_before = psutil.cpu_percent(interval=None)
+
+    start_time = time.time()
+    result = func(*args, **kwargs)
+    latency = time.time() - start_time
+
+    mem_after = process.memory_info().rss / (1024 * 1024)
+    cpu_after = psutil.cpu_percent(interval=1)
+
+    mem_used = mem_after - mem_before
+    cpu_used = cpu_after - cpu_before
+
+    metrics = {
+        "latency_sec": round(latency, 2),
+        "memory_used_mb": round(mem_used, 2),
+        "cpu_used_percent": round(cpu_used, 2),
+    }
+    return result, metrics
+
+
+
+
+
+
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 st.set_page_config(page_title="AI Image & Speech App", layout="wide")
@@ -25,12 +68,15 @@ if st.button("💬 Emotion Awareness"):
 
 #  Gemini AI response
 def get_gemini_response(input_text, speech_text, image):
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('models/gemini-2.5-flash')
     combined_input = f"{input_text}\n{speech_text}" if speech_text else input_text
     if combined_input.strip():
         response = model.generate_content([combined_input, image] if image else [combined_input])
         return response.text
     return "Please provide some input."
+
+
+
 
 # Convert Text to Speech (TTS)
 def text_to_speech(response_text):
@@ -64,40 +110,44 @@ if uploaded_file:
 
 st.markdown("<br><br>", unsafe_allow_html=True) # Add some space
 
-from audiorecorder import audiorecorder
-import io
-
-# ...
 
 col1, col2 = st.columns([1, 1])
 
 with col1:
     st.subheader("📜 Enter Text")
     input_text = st.text_area("Type your input:", placeholder="Enter prompt here...", height=150)
-
 with col2:
     st.subheader("🎤 Speak Input")
     st.text_area("Recognized Speech:", st.session_state["recognized_text"], height=100, disabled=True)
 
-    st.markdown("Click below to record in the browser:")
-    audio = audiorecorder("🎙️ Start Recording", "⏹️ Stop Recording")
-
-    if len(audio) > 0:
-        # Save the recording to a temporary wav file
-        wav_bytes = audio.tobytes()
-        audio_buffer = io.BytesIO(wav_bytes)
-
+    # Speech Recognition Button
+    if st.button("Start Speech Recognition", key="speech_button"):
         recognizer = sr.Recognizer()
-        try:
-            with sr.AudioFile(audio_buffer) as source:
-                recorded_audio = recognizer.record(source)
-                spoken_text = recognizer.recognize_google(recorded_audio)
-                st.session_state["recognized_text"] = spoken_text
+        with sr.Microphone() as source:
+
+            st.markdown("""
+                    <div style="
+                        background-color: #D4EDDA; /* Light green */
+                        color: #155724; /* Dark green text */
+                        padding: 10px;
+                        size:300px;
+                        border-left: 5px solid #155724;
+                        border-radius: 10px;
+                        font-weight: bold;
+                    ">
+                        🎤 Listening...
+                    </div>
+                """, unsafe_allow_html=True)
+
+            try:
+                audio = recognizer.listen(source)
+                spoken_text = recognizer.recognize_google(audio)
+                st.session_state["recognized_text"] = spoken_text  
                 st.rerun()
-        except sr.UnknownValueError:
-            st.warning("Could not understand the audio.")
-        except sr.RequestError as e:
-            st.error(f"Speech recognition service error: {e}")
+            except sr.UnknownValueError:
+                st.warning("Could not understand the audio.")
+            except sr.RequestError:
+                st.error("Speech recognition service error.")
 
 
 # Combine inputs
@@ -109,12 +159,28 @@ if st.button("🚀 Generate Response", key="generate_button"):
     if not final_text.strip():
         st.warning("Please enter text or speak before generating a response.")
     else:
-        with st.spinner("Generating response..."):
-            response = get_gemini_response(input_text, st.session_state["recognized_text"], image)
-            st.session_state["ai_response"] = response  # Store response
-            st.session_state["audio_file"] = text_to_speech(response)  # Convert to speech
+        with st.spinner("Generating response and measuring performance..."):
+            response, metrics = measure_performance(
+                get_gemini_response, input_text, st.session_state["recognized_text"], image
+            )
+            
+            st.session_state["ai_response"] = response
+            st.session_state["audio_file"] = text_to_speech(response)
+
         st.success("Response Generated!")
+
+        # Display the response
+        st.subheader("🧠 AI Response:")
         st.write(response)
+
+        # # Display performance metrics
+        # st.markdown("---")
+        # st.subheader("⚙️ Performance Metrics")
+        # col1, col2, col3 = st.columns(3)
+        # col1.metric("⏱ Latency (s)", metrics["latency_sec"])
+        # col2.metric("💾 Memory Used (MB)", metrics["memory_used_mb"])
+        # col3.metric("⚙️ CPU Used (%)", metrics["cpu_used_percent"])
+
 st.markdown("</div>", unsafe_allow_html=True)
 
 # Play Audio Response
